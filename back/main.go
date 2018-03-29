@@ -252,7 +252,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func Dump(w http.ResponseWriter, r *http.Request) {
-	//queryValues := r.URL.Query()
 	urlPart := strings.Split(r.URL.Path, "/")
 	dumpWhat := urlPart[2]
 	log.Println(r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
