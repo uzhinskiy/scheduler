@@ -1,0 +1,43 @@
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css"> <!-- Bootstrap Grid -->
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+</head>
+<body class="container">
+
+<h1>Login</h1>
+
+    <form action="/auth" role="form" class="register-form" method="POST">
+        <input type="hidden" name="m" value="login">
+        <table class="table">
+            <tr>
+                <td>Username</td>
+                <td><input type="text" name="username"></td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                <td><input type="password" name="passwd"></td>
+            </tr>
+        </table>
+        <div class="alert alert-danger hidden">Password mismatch or user unknown!</div>
+        <button type="submit" class="btn btn-blue1">Login</button>
+    </form>
+
+<script>
+function getCookie(name) {
+  var matches = document.cookie.match(new RegExp(
+    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+  ));
+  return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+$(document).ready(function(){
+    var c = getCookie('isauth');
+    if (c == 'no') {
+        $(".alert").removeClass('hidden');
+    }
+});
+</script>
+</body>
+</html>

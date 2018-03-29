@@ -1,0 +1,29 @@
+{
+  "i-123456789": {
+    "id": "i-123456789",
+    "name": "Server_1",
+    "workday": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "stoptime": "21:59",
+    "starttime": "07:59"
+  },
+  "i-987654321": {
+    "id": "i-987654321",
+    "name": "Server_2",
+    "workday": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday"
+    ],
+    "stoptime": "21:59",
+    "starttime": "07:59"
+  }
+}

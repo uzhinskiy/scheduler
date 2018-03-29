@@ -1,0 +1,250 @@
+<html>
+<head>
+<title>Instances Start/Stop Scheduler</title>
+<link rel="stylesheet" href="/assets/css/bootstrap.min.css"> <!-- Bootstrap Grid -->
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/bootstrap.min.js"></script>
+</head>
+<body class="container">
+
+<h1>Scheduler</h1>
+   <button data-toggle='modal' data-target='#create_instance' class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add new instance</button>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Instanse ID</th>
+            <th>Instanse Name</th>
+            <th>Working days</th>
+            <th>Working time</th>
+            <th>Actions</th>
+        </tr>    
+    </thead>
+    <tbody id="list">
+    </tbody>
+</table>
+
+
+<div class="modal fade" tabindex="-1" id="delete_instance" role="dialog">
+  <div class="modal-dialog" role="document">
+    <form action="/delete" role="form" class="register-form" method="POST">
+        <input type="hidden" name="m" value="update">
+        <input type="hidden" id="d_idh" name="id">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Delete instance</h4>
+            </div>
+            <div class="modal-body">
+                <h5>Are you sure to delete instanse <mark id="d_idv" ></mark> / <mark id="d_name"></mark> ?</h5>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-warning">Delete</button>
+				<button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </form>
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div class="modal fade" tabindex="-1" id="update_instance" role="dialog">
+  <div class="modal-dialog" role="document">
+    <form action="/update" role="form" class="form-horizontal" method="POST" id="update_form">
+        <input type="hidden" name="m" value="update">
+        <input type="hidden" id="u_idh" name="id">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Update instance</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="u_idv" class="col-sm-3 control-label">ID</label>
+                    <div class="col-sm-9">
+                        <p id="u_idv"></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="u_name" class="col-sm-3 control-label">Name</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="u_name" name="name">
+                    </div>
+                </div>
+            
+                <div class="form-group">
+                    <label for="u_name" class="col-sm-3 control-label">Working Days</label>
+                    <div class="col-sm-9">
+                        <div class="checkbox">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" id="u_Sunday" value="Sunday"> Sunday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" id="u_Monday" value="Monday"> Monday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" id="u_Tuesday" value="Tuesday"> Tuesday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" id="u_Wednesday" value="Wednesday"> Wednesday
+                            </label><br>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" id="u_Thursday" value="Thursday"> Thursday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" id="u_Friday" value="Friday"> Friday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" id="u_Saturday" value="Saturday"> Saturday
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="u_name" class="col-sm-3 control-label">Start time</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="u_starttime" name="starttime">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="u_name" class="col-sm-3 control-label">Stop time</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="u_stoptime" name="stoptime">
+                    </div>
+                </div>                
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </form>
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" tabindex="-1" id="create_instance" role="dialog">
+  <div class="modal-dialog" role="document">
+    <form action="/create" role="form" class="register-form" method="POST">
+        <input type="hidden" name="m" value="create">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Add new instance</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="c_idv" class="col-sm-3 control-label">ID</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="c_idv" name="id">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="c_name" class="col-sm-3 control-label">Name</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="c_name" name="name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Working Days</label>
+                    <div class="col-sm-9">
+                        <div class="checkbox">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" value="Sunday"> Sunday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" value="Monday"> Monday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" value="Tuesday"> Tuesday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" value="Wednesday"> Wednesday
+                            </label><br>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" value="Thursday"> Thursday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" value="Friday"> Friday
+                            </label>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="wd" value="Saturday"> Saturday
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="c_starttime" class="col-sm-3 control-label">Start time</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="c_starttime" name="starttime" placeholder="07:59">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="c_stoptime" class="col-sm-3 control-label">Stop time</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="c_stoptime" name="stoptime" placeholder="21:59">
+                    </div>
+                </div>                
+            </div>
+			<div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </form>
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+<script>
+$(document).ready(function(){
+    $.get("/list", function(data){
+        //var block_arr = JSON.parse(data);
+        var block_arr = data;
+        var str = "";
+        for(var k in block_arr) {
+            str += "<tr><td>"+block_arr[k].id+"</td>";
+            str += "<td>"+block_arr[k].name+"</td>";
+            str += "<td>"+block_arr[k].workday+"</td>";
+            str += "<td>"+block_arr[k].starttime+" &mdash; "+block_arr[k].stoptime+"</td>";
+            str += "<td><a href='#' data-id='"+k+"' data-toggle='modal' data-target='#update_instance'>Update</a>&nbsp;|&nbsp;<a href='#' data-id='"+k+"' data-toggle='modal' data-target='#delete_instance'>Delete</a></td>";
+        }
+        $('#list').append(str);
+    });
+});
+
+$('#update_instance').on('shown.bs.modal',function(e){
+    var id = $(e.relatedTarget).data('id');
+    
+    $.get("/info?id="+id, function(data){
+        var block_arr = JSON.parse(data);
+        $('#u_idh').val(id);
+        $('#u_idv').html(id);
+        $('#u_name').val(block_arr.name);
+        $('#u_starttime').val(block_arr.starttime);
+        $('#u_stoptime').val(block_arr.stoptime);
+        for(var j in block_arr.workday) {
+            if (block_arr.workday[j])
+				$('#u_'+block_arr.workday[j]).prop({checked:true});
+        }
+    });
+});
+
+$('#update_instance').on('hidden.bs.modal',function(){
+	$('form#update_form').trigger( 'reset' );
+});
+
+
+$('#delete_instance').on('shown.bs.modal',function(e){
+    var id = $(e.relatedTarget).data('id');
+    $.get("/info?id="+id, function(data){
+        var block_arr = JSON.parse(data);
+        $('#d_idh').val(id);
+        $('#d_idv').html(id);
+        $('#d_name').html(block_arr.name);
+    });
+});
+
+</script>
+
+</body>
+</html>
