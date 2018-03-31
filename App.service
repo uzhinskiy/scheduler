@@ -1,0 +1,13 @@
+[Unit]
+Description=
+After=network.target
+
+[Service]
+Type=simple
+TimeoutStartSec=60
+ExecStart=/usr/local/sbin/App -config /usr/local/etc/App.cfg
+ExecStop=/bin/killall App
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
