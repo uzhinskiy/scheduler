@@ -158,7 +158,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	contentType := mime.TypeByExtension(path.Ext(file))
 	var bytes = make([]byte, fi.Size())
 	respFile.Read(bytes)
-	log.Println(r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
+	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
 	/* отправить его клиенту */
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Server", conf.Config["version"])
@@ -170,7 +170,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Server", conf.Config["version"])
-	log.Println(r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
+	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 	fmt.Fprint(w, fmt.Sprintf("%s", custJSONs))
 }
 
@@ -185,7 +185,7 @@ func Info(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.Header().Set("Server", conf.Config["version"])
-	log.Println(r.Method, "\t", r.URL.RequestURI(), "\t", http.StatusOK, "\t", r.UserAgent())
+	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.RequestURI(), "\t", http.StatusOK, "\t", r.UserAgent())
 	fmt.Fprint(w, fmt.Sprintf("%s", j))
 }
 
@@ -203,6 +203,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	new_cj.Starttime = queryValues("starttime")
 	new_cj.Stoptime = queryValues("stoptime")
 	new_cj.Exclude = queryValues("exclude")
+	if new_cj.Exclude == "" {
+		new_cj.Exclude = "no"
+	}
 	new_cj.Workday = r.Form["wd"]
 
 	if new_cj.Id != "" && new_cj.Name != "" && new_cj.Starttime != "" && new_cj.Stoptime != "" {
@@ -217,10 +220,10 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.Header().Set("Server", conf.Config["version"])
-		log.Println(r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
+		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
 		fmt.Fprint(w, "<h1>Error while file saving</h1><a href='/'>back</a>")
 	} else {
-		log.Println(r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
+		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 		http.Redirect(w, r, "/admin", http.StatusMovedPermanently)
 	}
 }
@@ -245,10 +248,10 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.Header().Set("Server", conf.Config["version"])
-		log.Println(r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
+		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
 		fmt.Fprint(w, "<h1>Error while file saving</h1><a href='/'>back</a>")
 	} else {
-		log.Println(r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
+		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 		http.Redirect(w, r, "/admin", http.StatusMovedPermanently)
 	}
 }
@@ -256,7 +259,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 func Dump(w http.ResponseWriter, r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
 	dumpWhat := urlPart[2]
-	log.Println(r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
+	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.Header().Set("Server", conf.Config["version"])
@@ -303,7 +306,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	/* если не удалось загрузить нужный файл – показать сообщение о 404-ой ошибке */
 	respFile, err := os.OpenFile(base+file, os.O_RDONLY, 0)
 	if err != nil {
-		log.Println(err)
+		log.Println(r.RemoteAddr, "\t", err)
 		file = "/404.html"
 		respFile, err = os.OpenFile(base+file, os.O_RDONLY, 0)
 		code = http.StatusNotFound
@@ -313,7 +316,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	contentType := mime.TypeByExtension(path.Ext(file))
 	var bytes = make([]byte, fi.Size())
 	respFile.Read(bytes)
-	log.Println(r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
+	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
 	/* отправить его клиенту */
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Server", conf.Config["version"])
@@ -325,7 +328,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	err := htp.OpenHTPASSFile(conf.Config["pswdfile"])
 	queryValues := r.PostFormValue
 	res, err := htp.Auth(queryValues("username"), queryValues("passwd"))
-	log.Printf("%v\t%v\t%v\n", htpass.IsAuth, res, err)
+	log.Printf("%s\t%v\t%v\t%v\n", r.RemoteAddr, htpass.IsAuth, res, err)
 	if err != nil {
 		fmt.Println(err)
 	}
