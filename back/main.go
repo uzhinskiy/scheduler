@@ -30,6 +30,7 @@ type InstanceJSON struct {
 	Workday   []string `json:"workday,omitempty"`
 	Stoptime  string   `json:"stoptime,omitempty"`
 	Starttime string   `json:"starttime,omitempty"`
+	Exclude   string   `json:"exclude,omitempty"`
 }
 
 type InstancesJSON map[string]InstanceJSON
@@ -201,6 +202,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	new_cj.Name = queryValues("name")
 	new_cj.Starttime = queryValues("starttime")
 	new_cj.Stoptime = queryValues("stoptime")
+	new_cj.Exclude = queryValues("exclude")
 	new_cj.Workday = r.Form["wd"]
 
 	if new_cj.Id != "" && new_cj.Name != "" && new_cj.Starttime != "" && new_cj.Stoptime != "" {
