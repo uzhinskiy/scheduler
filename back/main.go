@@ -212,7 +212,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		cj[id] = new_cj
 		err = updateJSON(cj)
 	} else {
-		err = fmt.Errorf("error")
+		err = fmt.Errorf("Required parameters empty\nData dump:\n%v\n", new_cj)
 	}
 
 	if err != nil {
@@ -221,7 +221,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.Header().Set("Server", conf.Config["version"])
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
-		fmt.Fprint(w, "<h1>Error while file saving</h1><a href='/'>back</a>")
+		fmt.Fprintf(w, "<h1>Error while file saving</h1><p>Data dump:</p><pre>%v</pre><a href='/admin'>back</a>", new_cj)
 	} else {
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 		http.Redirect(w, r, "/admin", http.StatusMovedPermanently)
@@ -249,7 +249,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		w.Header().Set("Server", conf.Config["version"])
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
-		fmt.Fprint(w, "<h1>Error while file saving</h1><a href='/'>back</a>")
+		fmt.Fprint(w, "<h1>Error while file saving</h1><a href='/admin'>back</a>")
 	} else {
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 		http.Redirect(w, r, "/admin", http.StatusMovedPermanently)
