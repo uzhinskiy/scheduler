@@ -210,9 +210,8 @@
 
 <script>
 $(document).ready(function(){
-    $.get("/list", function(data){
+    $.get("/list", function(block_arr){
         //var block_arr = JSON.parse(data);
-        var block_arr = data;
         var str = "";
         for(var k in block_arr) {
 			if (typeof block_arr[k].exclude==="undefined") {
@@ -221,11 +220,28 @@ $(document).ready(function(){
 				exclude = block_arr[k].exclude;
 			}
             str += "<tr><td>"+block_arr[k].id+"</td>";
-            str += "<td>"+block_arr[k].name+"</td>";
+            str += "<td>"+block_arr[k].name+"<span id='"+block_arr[k].id+"'></span></td>";
             str += "<td>"+block_arr[k].workday+"</td>";
             str += "<td>"+block_arr[k].starttime+" &mdash; "+block_arr[k].stoptime+"</td>";
 			str += "<td>"+exclude+"</td>";
             str += "<td><a href='#' data-id='"+k+"' data-toggle='modal' data-target='#update_instance'>Update</a>&nbsp;|&nbsp;<a href='#' data-id='"+k+"' data-toggle='modal' data-target='#delete_instance'>Delete</a></td>";
+			status_request = "Action=DescribeInstanceStatus&InstanceId.1="+block_arr[k].id+"&AUTHPARAMS";
+			$.ajax({
+				url: 'http://ec2.amazonaws.com/',
+				type: 'GET',
+				crossDomain: true,
+				contentType: 'application/xml',
+				data: status_request,
+				dataType: 'xml',
+				success: function(data) {
+					//success stuff. data here is the response, not your original data
+					console.log(data);
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					//error handling stuff
+					console.log(xhr, ajaxOptions, thrownError);
+				}
+			});
         }
         $('#list').append(str);
     });
