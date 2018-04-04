@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"./conf"
-	"github.com/uzhinskiy/htpass"
+	"github.com/uzhinskiy/lib.go/htpass"
+	"github.com/uzhinskiy/lib.go/pconf"
 )
 
 var (
@@ -22,6 +22,7 @@ var (
 	HTTPAddr   string
 	err        error
 	authttl    int
+	Config     pconf.ConfigType
 )
 
 type InstanceJSON struct {
@@ -42,76 +43,25 @@ func init() {
 	flag.StringVar(&configfile, "config", "main.cfg", "Read configuration from this file")
 	flag.Parse()
 
-	conf.Config = make(conf.ConfigType)
-	err := conf.Config.Parse(configfile)
+	Config = make(pconf.ConfigType)
+	err := Config.Parse(configfile)
 
 	checkError(err, 1)
 
-	log.Println("Read from config ", len(conf.Config), " items")
-	if conf.Config["bind"] != "" {
-		addr = conf.Config["bind"]
+	log.Println("Read from config ", len(Config), " items:", Config)
+	if Config["bind"] != "" {
+		addr = Config["bind"]
 	}
-	if conf.Config["port"] != "" {
-		port = conf.Config["port"]
+	if Config["port"] != "" {
+		port = Config["port"]
 	}
 	HTTPAddr = addr + ":" + port
 	fmt.Println(HTTPAddr)
 }
 
-func checkError(err error, fatal int) {
-	if err != nil {
-		if fatal == 1 {
-			log.Fatal("Error: ", err)
-		} else {
-			log.Println("Error: ", err)
-		}
-	}
-}
-
-func getJson() (string, InstancesJSON) {
-	var cj InstancesJSON
-
-	respFile, err := os.OpenFile(conf.Config["json"], os.O_RDONLY, 0)
-	if err != nil {
-		log.Println("getJSON: error reading file: ", err)
-	}
-	/* считать содержимое файла */
-	fi, err := respFile.Stat()
-	var bytes = make([]byte, fi.Size())
-	respFile.Read(bytes)
-
-	err = json.Unmarshal(bytes, &cj)
-	if err != nil {
-		log.Println(err)
-	}
-
-	return string(bytes), cj
-}
-
-func updateJSON(cj InstancesJSON) error {
-	out, _ := json.Marshal(cj)
-	custFile, err := os.OpenFile(conf.Config["json"], os.O_WRONLY|os.O_CREATE, 0644)
-	defer custFile.Close()
-	custFile.Truncate(0)
-	custFile.Seek(0, 0)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	_, err = custFile.WriteString(string(out))
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	return nil
-}
-
 func main() {
 	logTo := os.Stderr
-
-	if logTo, err = os.OpenFile(conf.Config["log_file"], os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600); err != nil {
+	if logTo, err = os.OpenFile(Config["log_file"], os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600); err != nil {
 		log.Fatal(err)
 	}
 	defer logTo.Close()
@@ -135,10 +85,60 @@ func main() {
 
 }
 
+func checkError(err error, fatal int) {
+	if err != nil {
+		if fatal == 1 {
+			log.Fatal("Error: ", err)
+		} else {
+			log.Println("Error: ", err)
+		}
+	}
+}
+
+func getJson() (string, InstancesJSON) {
+	var cj InstancesJSON
+
+	respFile, err := os.OpenFile(Config["json"], os.O_RDONLY, 0)
+	if err != nil {
+		log.Println("getJSON: error reading file: ", err)
+	}
+	/* считать содержимое файла */
+	fi, err := respFile.Stat()
+	var bytes = make([]byte, fi.Size())
+	respFile.Read(bytes)
+
+	err = json.Unmarshal(bytes, &cj)
+	if err != nil {
+		log.Println(err)
+	}
+
+	return string(bytes), cj
+}
+
+func updateJSON(cj InstancesJSON) error {
+	out, _ := json.Marshal(cj)
+	custFile, err := os.OpenFile(Config["json"], os.O_WRONLY|os.O_CREATE, 0644)
+	defer custFile.Close()
+	custFile.Truncate(0)
+	custFile.Seek(0, 0)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	_, err = custFile.WriteString(string(out))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 /* функция для обработки подключившихся клиентов */
 func Index(w http.ResponseWriter, r *http.Request) {
 	file := r.URL.Path
-	base := conf.Config["document_root"]
+	base := Config["document_root"]
 	/* если отсутствует запрос к конкретному файлу – показать индексный файл */
 	if file == "/" {
 		file = "/index.html"
@@ -161,7 +161,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
 	/* отправить его клиенту */
 	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Server", conf.Config["version"])
+	w.Header().Set("Server", Config["version"])
 	w.Write(bytes)
 }
 
@@ -169,7 +169,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	custJSONs, _ := getJson()
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("Server", conf.Config["version"])
+	w.Header().Set("Server", Config["version"])
 	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 	fmt.Fprint(w, fmt.Sprintf("%s", custJSONs))
 }
@@ -184,7 +184,7 @@ func Info(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	w.Header().Set("Server", conf.Config["version"])
+	w.Header().Set("Server", Config["version"])
 	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.RequestURI(), "\t", http.StatusOK, "\t", r.UserAgent())
 	fmt.Fprint(w, fmt.Sprintf("%s", j))
 }
@@ -219,7 +219,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-		w.Header().Set("Server", conf.Config["version"])
+		w.Header().Set("Server", Config["version"])
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
 		fmt.Fprintf(w, "<h1>Error while file saving</h1><p>Data dump:</p><pre>%v</pre><a href='/admin'>back</a>", new_cj)
 	} else {
@@ -247,7 +247,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-		w.Header().Set("Server", conf.Config["version"])
+		w.Header().Set("Server", Config["version"])
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
 		fmt.Fprint(w, "<h1>Error while file saving</h1><a href='/admin'>back</a>")
 	} else {
@@ -262,20 +262,20 @@ func Dump(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	w.Header().Set("Server", conf.Config["version"])
+	w.Header().Set("Server", Config["version"])
 
 	switch dumpWhat {
 	case "config":
 		{
 			fmt.Fprint(w, "<pre><ul>")
-			for k, cfg := range conf.Config {
+			for k, cfg := range Config {
 				fmt.Fprintf(w, "<li>%s = %s</li>", k, cfg)
 			}
 			fmt.Fprint(w, "</ul></pre>")
 		}
 	case "log":
 		{
-			respFile, err := os.OpenFile(conf.Config["log_file"], os.O_RDONLY, 0)
+			respFile, err := os.OpenFile(Config["log_file"], os.O_RDONLY, 0)
 			if err != nil {
 				log.Println(err)
 			}
@@ -293,7 +293,7 @@ func Dump(w http.ResponseWriter, r *http.Request) {
 
 func Admin(w http.ResponseWriter, r *http.Request) {
 	file := r.URL.Path
-	base := conf.Config["document_root"]
+	base := Config["document_root"]
 
 	auth_cookie, _ := r.Cookie("isauth")
 	/* если отсутствует запрос к конкретному файлу – показать индексный файл */
@@ -319,20 +319,20 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
 	/* отправить его клиенту */
 	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Server", conf.Config["version"])
+	w.Header().Set("Server", Config["version"])
 	w.Write(bytes)
 }
 
 func Auth(w http.ResponseWriter, r *http.Request) {
 	htp := make(htpass.HTPassFile)
-	err := htp.OpenHTPASSFile(conf.Config["pswdfile"])
+	err := htp.OpenHTPASSFile(Config["pswdfile"])
 	queryValues := r.PostFormValue
 	res, err := htp.Auth(queryValues("username"), queryValues("passwd"))
 	log.Printf("%s\t%v\t%v\t%v\n", r.RemoteAddr, htpass.IsAuth, res, err)
 	if err != nil {
 		fmt.Println(err)
 	}
-	authttl, _ = strconv.Atoi(conf.Config["authttl"])
+	authttl, _ = strconv.Atoi(Config["authttl"])
 	if res {
 		expiration := time.Now().Add(time.Duration(authttl) * time.Minute)
 		cookie := http.Cookie{Name: "isauth", Value: "yes", Expires: expiration}
