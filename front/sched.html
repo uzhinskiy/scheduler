@@ -240,7 +240,7 @@
 
 <script>
 $(document).ready(function(){
-    $.get("/list", function(data){
+    $.get("/list?object=scheduler", function(data){
         //var block_arr = JSON.parse(data);
         var block_arr = data;
         var str = "";
@@ -264,7 +264,7 @@ $(document).ready(function(){
 $('#update_instance').on('shown.bs.modal',function(e){
     var id = $(e.relatedTarget).data('id');
     
-    $.get("/info?id="+id, function(data){
+    $.get("/info?object=scheduler&id="+id, function(data){
         var block_arr = JSON.parse(data);
         $('#u_idh').val(id);
         $('#u_idv').html(id);
@@ -293,7 +293,7 @@ $('#update_instance').on('hidden.bs.modal',function(){
 
 $('#delete_instance').on('shown.bs.modal',function(e){
     var id = $(e.relatedTarget).data('id');
-    $.get("/info?id="+id, function(data){
+    $.get("/info?object=scheduler&id="+id, function(data){
         var block_arr = JSON.parse(data);
         $('#d_idh').val(id);
         $('#d_idv').html(id);

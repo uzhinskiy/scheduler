@@ -25,7 +25,7 @@ var (
 	Config     pconf.ConfigType
 )
 
-type InstanceJSON struct {
+type ScheduleJSON struct {
 	Id        string   `json:"id,omitempty"`
 	Name      string   `json:"name,omitempty"`
 	Workday   []string `json:"workday,omitempty"`
@@ -34,7 +34,19 @@ type InstanceJSON struct {
 	Exclude   string   `json:"exclude,omitempty"`
 }
 
-type InstancesJSON map[string]InstanceJSON
+type SnapsotJSON struct {
+	Id       string `json:"id,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Keepdays int    `json:"keepdays,omitempty"`
+}
+
+type SchedulesJSON map[string]ScheduleJSON
+type SnapsotsJSON map[string]SnapsotJSON
+
+type ResponseJSON interface {
+	getJson()
+	updateJSON()
+}
 
 func init() {
 	var addr, port string
@@ -69,6 +81,8 @@ func main() {
 
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/admin", Admin)
+	http.HandleFunc("/scheduler", Scheduler)
+	http.HandleFunc("/snapshots", Snapshots)
 	http.HandleFunc("/auth", Auth)
 	http.HandleFunc("/list", List)
 	http.HandleFunc("/info", Info)
@@ -95,8 +109,8 @@ func checkError(err error, fatal int) {
 	}
 }
 
-func getJson() (string, InstancesJSON) {
-	var cj InstancesJSON
+func getJson() (string, SchedulesJSON) {
+	var cj SchedulesJSON
 
 	respFile, err := os.OpenFile(Config["json"], os.O_RDONLY, 0)
 	if err != nil {
@@ -115,7 +129,7 @@ func getJson() (string, InstancesJSON) {
 	return string(bytes), cj
 }
 
-func updateJSON(cj InstancesJSON) error {
+func updateJSON(cj SchedulesJSON) error {
 	out, _ := json.Marshal(cj)
 	custFile, err := os.OpenFile(Config["json"], os.O_WRONLY|os.O_CREATE, 0644)
 	defer custFile.Close()
@@ -190,7 +204,7 @@ func Info(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
-	var new_cj InstanceJSON
+	var new_cj ScheduleJSON
 	var err error
 
 	_, cj := getJson()
@@ -301,6 +315,70 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		file = "/login.html"
 	} else {
 		file = "/admin.html"
+	}
+	code := http.StatusOK
+	/* если не удалось загрузить нужный файл – показать сообщение о 404-ой ошибке */
+	respFile, err := os.OpenFile(base+file, os.O_RDONLY, 0)
+	if err != nil {
+		log.Println(r.RemoteAddr, "\t", err)
+		file = "/404.html"
+		respFile, err = os.OpenFile(base+file, os.O_RDONLY, 0)
+		code = http.StatusNotFound
+	}
+	/* считать содержимое файла */
+	fi, err := respFile.Stat()
+	contentType := mime.TypeByExtension(path.Ext(file))
+	var bytes = make([]byte, fi.Size())
+	respFile.Read(bytes)
+	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
+	/* отправить его клиенту */
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Server", Config["version"])
+	w.Write(bytes)
+}
+
+func Scheduler(w http.ResponseWriter, r *http.Request) {
+	file := r.URL.Path
+	base := Config["document_root"]
+
+	auth_cookie, _ := r.Cookie("isauth")
+	/* если отсутствует запрос к конкретному файлу – показать индексный файл */
+	if auth_cookie == nil || auth_cookie.Value == "no" {
+		file = "/login.html"
+	} else {
+		file = "/sched.html"
+	}
+	code := http.StatusOK
+	/* если не удалось загрузить нужный файл – показать сообщение о 404-ой ошибке */
+	respFile, err := os.OpenFile(base+file, os.O_RDONLY, 0)
+	if err != nil {
+		log.Println(r.RemoteAddr, "\t", err)
+		file = "/404.html"
+		respFile, err = os.OpenFile(base+file, os.O_RDONLY, 0)
+		code = http.StatusNotFound
+	}
+	/* считать содержимое файла */
+	fi, err := respFile.Stat()
+	contentType := mime.TypeByExtension(path.Ext(file))
+	var bytes = make([]byte, fi.Size())
+	respFile.Read(bytes)
+	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", code, "\t", r.UserAgent())
+	/* отправить его клиенту */
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Server", Config["version"])
+	w.Write(bytes)
+}
+
+func Snapshots(w http.ResponseWriter, r *http.Request) {
+	file := r.URL.Path
+	base := Config["document_root"]
+
+	auth_cookie, _ := r.Cookie("isauth")
+	/* если отсутствует запрос к конкретному файлу – показать индексный файл */
+	if auth_cookie == nil || auth_cookie.Value == "no" {
+		file = "/login.html"
+	} else {
+		file = "/snap.html"
 	}
 	code := http.StatusOK
 	/* если не удалось загрузить нужный файл – показать сообщение о 404-ой ошибке */

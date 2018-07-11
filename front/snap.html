@@ -8,7 +8,6 @@
 </head>
 <body class="container">
 
-
 <header style="margin-bottom: 60px;">
   <nav class="navbar navbar-default navbar-fixed-top">
   <div class="container">
@@ -37,7 +36,8 @@
 </nav>
 </header>
 
-<h1>Scheduler</h1>
+
+<h1>Snapshots</h1>
    <button data-toggle='modal' data-target='#create_instance' class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add new instance</button>
 
 <table class="table">
@@ -45,9 +45,7 @@
         <tr>
             <th>Instanse ID</th>
             <th>Instanse Name</th>
-            <th>Working days</th>
-            <th>Working time</th>
-			<th>Exclude</th>
+            <th>Keep days</th>
             <th>Actions</th>
         </tr>    
     </thead>
@@ -240,21 +238,14 @@
 
 <script>
 $(document).ready(function(){
-    $.get("/list", function(data){
+    $.get("/list?object=snapshots", function(data){
         //var block_arr = JSON.parse(data);
         var block_arr = data;
         var str = "";
         for(var k in block_arr) {
-			if (typeof block_arr[k].exclude==="undefined") {
-				exclude = 'no';
-			} else {
-				exclude = block_arr[k].exclude;
-			}
             str += "<tr><td>"+block_arr[k].id+"</td>";
             str += "<td>"+block_arr[k].name+"</td>";
-            str += "<td>"+block_arr[k].workday+"</td>";
-            str += "<td>"+block_arr[k].starttime+" &mdash; "+block_arr[k].stoptime+"</td>";
-			str += "<td>"+exclude+"</td>";
+            str += "<td>"+block_arr[k].keepdays+"</td>";
             str += "<td><a href='#' data-id='"+k+"' data-toggle='modal' data-target='#update_instance'>Update</a>&nbsp;|&nbsp;<a href='#' data-id='"+k+"' data-toggle='modal' data-target='#delete_instance'>Delete</a></td>";
         }
         $('#list').append(str);
@@ -264,7 +255,7 @@ $(document).ready(function(){
 $('#update_instance').on('shown.bs.modal',function(e){
     var id = $(e.relatedTarget).data('id');
     
-    $.get("/info?id="+id, function(data){
+    $.get("/info?object=snapshots&id="+id, function(data){
         var block_arr = JSON.parse(data);
         $('#u_idh').val(id);
         $('#u_idv').html(id);
@@ -293,7 +284,7 @@ $('#update_instance').on('hidden.bs.modal',function(){
 
 $('#delete_instance').on('shown.bs.modal',function(e){
     var id = $(e.relatedTarget).data('id');
-    $.get("/info?id="+id, function(data){
+    $.get("/info?object=snapshots&id="+id, function(data){
         var block_arr = JSON.parse(data);
         $('#d_idh').val(id);
         $('#d_idv').html(id);
