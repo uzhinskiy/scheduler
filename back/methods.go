@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"log"
 	"mime"
@@ -109,13 +109,30 @@ func Snapshots(w http.ResponseWriter, r *http.Request) {
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-	custJSONs, _ := getJson()
+	var custJSONs string
+	queryValues := r.URL.Query()
+	obj := queryValues.Get("object")
+	fmt.Println(obj)
+	if obj == "scheduler" {
+		var sj SchedulesJSON
+		custJSONs = sj.getJson()
+	} else if obj == "snapshots" {
+		var sj SnapshotsJSON
+		custJSONs = sj.getJson()
+	}
+
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Server", Config["version"])
 	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
 	fmt.Fprint(w, fmt.Sprintf("%s", custJSONs))
 }
+
+func Info(w http.ResponseWriter, r *http.Request)   {}
+func Update(w http.ResponseWriter, r *http.Request) {}
+func Delete(w http.ResponseWriter, r *http.Request) {}
+
+/*
 
 func Info(w http.ResponseWriter, r *http.Request) {
 	_, cj := getJson()
@@ -198,6 +215,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/admin", http.StatusMovedPermanently)
 	}
 }
+*/
 
 func Auth(w http.ResponseWriter, r *http.Request) {
 	htp := make(htpass.HTPassFile)

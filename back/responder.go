@@ -15,24 +15,24 @@ type ScheduleJSON struct {
 	Exclude   string   `json:"exclude,omitempty"`
 }
 
-type SnapsotJSON struct {
+type SnapshotJSON struct {
 	Id       string `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
 	Keepdays int    `json:"keepdays,omitempty"`
 }
 
 type SchedulesJSON map[string]ScheduleJSON
-type SnapsotsJSON map[string]SnapsotJSON
+type SnapshotsJSON map[string]SnapshotJSON
 
 type Responder interface {
-	getJson() error
-	updateJSON() error
+	getJson()
+	updateJSON()
 }
 
-func getJson() (string, SchedulesJSON) {
-	var cj SchedulesJSON
+/* Реализация для Scheduler */
 
-	respFile, err := os.OpenFile(Config["json"], os.O_RDONLY, 0)
+func (sj *SchedulesJSON) getJson() string {
+	respFile, err := os.OpenFile(Config["scheduler"], os.O_RDONLY, 0)
 	if err != nil {
 		log.Println("getJSON: error reading file: ", err)
 	}
@@ -41,12 +41,12 @@ func getJson() (string, SchedulesJSON) {
 	var bytes = make([]byte, fi.Size())
 	respFile.Read(bytes)
 
-	err = json.Unmarshal(bytes, &cj)
+	err = json.Unmarshal(bytes, &sj)
 	if err != nil {
 		log.Println(err)
 	}
 
-	return string(bytes), cj
+	return string(bytes)
 }
 
 func updateJSON(cj SchedulesJSON) error {
@@ -68,3 +68,30 @@ func updateJSON(cj SchedulesJSON) error {
 
 	return nil
 }
+
+/* Реализация для Snapshots */
+
+func (sj *SnapshotsJSON) getJson() string {
+	respFile, err := os.OpenFile(Config["snapshots"], os.O_RDONLY, 0)
+	if err != nil {
+		log.Println("getJSON: error reading file: ", err)
+	}
+	/* считать содержимое файла */
+	fi, err := respFile.Stat()
+	var bytes = make([]byte, fi.Size())
+	respFile.Read(bytes)
+
+	err = json.Unmarshal(bytes, &sj)
+	if err != nil {
+		log.Println(err)
+	}
+
+	return string(bytes)
+}
+
+/*
+https://stackoverflow.com/questions/33928175/how-to-pass-different-types-to-a-function
+https://stackoverflow.com/questions/40720039/how-to-make-possible-to-return-structs-of-different-types-from-one-function-with
+https://stackoverflow.com/questions/35657362/how-to-return-dynamic-type-struct-in-golang
+https://stackoverflow.com/questions/24911993/golang-use-one-value-in-conditional-from-function-returning-multiple-arguments
+*/
