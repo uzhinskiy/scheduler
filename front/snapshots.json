@@ -1,4 +1,1 @@
-{
-"i-123456789":{"id":"i-123456789","name":"Server_1","keepdays":10},
-"i-987654321":{"id":"i-987654321","name":"Server_2","keepdays":14}
-}
+{"i-123456789":{"id":"i-123456789","name":"Server_1","keepdays":11},"i-987654321":{"id":"i-987654321","keepdays":14,"name":"Server_2"}}

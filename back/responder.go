@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 )
@@ -45,9 +44,8 @@ func readJson(fname string) []byte {
 	return bytes
 }
 
-func writeJSON(cj SchedulesJSON) error {
-	out, _ := json.Marshal(cj)
-	custFile, err := os.OpenFile(Config["json"], os.O_WRONLY|os.O_CREATE, 0644)
+func writeJSON(fname string, jb []byte) error {
+	custFile, err := os.OpenFile(fname, os.O_WRONLY|os.O_CREATE, 0644)
 	defer custFile.Close()
 	custFile.Truncate(0)
 	custFile.Seek(0, 0)
@@ -56,7 +54,7 @@ func writeJSON(cj SchedulesJSON) error {
 		return err
 	}
 
-	_, err = custFile.WriteString(string(out))
+	_, err = custFile.WriteString(string(jb))
 	if err != nil {
 		log.Println(err)
 		return err

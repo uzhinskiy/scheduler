@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/uzhinskiy/lib.go/helpers"
 	"github.com/uzhinskiy/lib.go/htpass"
 )
 
@@ -167,17 +168,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		if queryValues("exclude") == "" {
 			ex = "no"
 		}
-
-		/*
-			new_cj = ScheduleJSON{Id: "", Name: "", Workday: nil, Stoptime: "", Starttime: "", Exclude: ""}
-
-			new_cj.Id = queryValues("id")
-			new_cj.Name = queryValues("name")
-			new_cj.Starttime = queryValues("starttime")
-			new_cj.Stoptime = queryValues("stoptime")
-			new_cj.Exclude = queryValues("exclude")
-			new_cj.Workday = r.Form["wd"]
-		*/
 		new_cj = ScheduleJSON{
 			Id:        queryValues("id"),
 			Name:      queryValues("name"),
@@ -189,13 +179,18 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		o_name = queryValues("name")
 
 	} else if obj == "snapshots" {
-		a := 1
-		a++
+		new_cj = SnapshotJSON{
+			Id:       queryValues("id"),
+			Name:     queryValues("name"),
+			Keepdays: helpers.Atoi(queryValues("keepdays"))}
+		o_id = queryValues("id")
+		o_name = queryValues("name")
 	}
 
 	if o_id != "" && o_name != "" {
 		sj[id] = new_cj
-		//err = updateJSON(sj)
+		jbytes, _ := json.Marshal(sj)
+		err = writeJSON(Config[obj], jbytes)
 	} else {
 		err = fmt.Errorf("Required parameters empty\nData dump:\n%v\n", new_cj)
 	}
