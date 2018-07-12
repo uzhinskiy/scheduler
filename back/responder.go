@@ -24,32 +24,28 @@ type SnapshotJSON struct {
 type SchedulesJSON map[string]ScheduleJSON
 type SnapshotsJSON map[string]SnapshotJSON
 
-type Responder interface {
-	getJson()
-	updateJSON()
-}
-
 /* Реализация для Scheduler */
 
-func (sj *SchedulesJSON) getJson() string {
-	respFile, err := os.OpenFile(Config["scheduler"], os.O_RDONLY, 0)
+func readJson(fname string) []byte {
+	json_f, err := os.OpenFile(fname, os.O_RDONLY, 0)
 	if err != nil {
 		log.Println("getJSON: error reading file: ", err)
 	}
 	/* считать содержимое файла */
-	fi, err := respFile.Stat()
+	fi, err := json_f.Stat()
 	var bytes = make([]byte, fi.Size())
-	respFile.Read(bytes)
+	json_f.Read(bytes)
 
-	err = json.Unmarshal(bytes, &sj)
-	if err != nil {
-		log.Println(err)
-	}
-
-	return string(bytes)
+	/*
+		err = json.Unmarshal(bytes, &sj)
+			if err != nil {
+				log.Println(err)
+			}
+	*/
+	return bytes
 }
 
-func updateJSON(cj SchedulesJSON) error {
+func writeJSON(cj SchedulesJSON) error {
 	out, _ := json.Marshal(cj)
 	custFile, err := os.OpenFile(Config["json"], os.O_WRONLY|os.O_CREATE, 0644)
 	defer custFile.Close()
@@ -67,26 +63,6 @@ func updateJSON(cj SchedulesJSON) error {
 	}
 
 	return nil
-}
-
-/* Реализация для Snapshots */
-
-func (sj *SnapshotsJSON) getJson() string {
-	respFile, err := os.OpenFile(Config["snapshots"], os.O_RDONLY, 0)
-	if err != nil {
-		log.Println("getJSON: error reading file: ", err)
-	}
-	/* считать содержимое файла */
-	fi, err := respFile.Stat()
-	var bytes = make([]byte, fi.Size())
-	respFile.Read(bytes)
-
-	err = json.Unmarshal(bytes, &sj)
-	if err != nil {
-		log.Println(err)
-	}
-
-	return string(bytes)
 }
 
 /*

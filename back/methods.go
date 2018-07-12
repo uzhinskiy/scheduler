@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"fmt"
 	"log"
 	"mime"
@@ -109,39 +109,33 @@ func Snapshots(w http.ResponseWriter, r *http.Request) {
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-	var custJSONs string
-	queryValues := r.URL.Query()
-	obj := queryValues.Get("object")
-	fmt.Println(obj)
-	if obj == "scheduler" {
-		var sj SchedulesJSON
-		custJSONs = sj.getJson()
-	} else if obj == "snapshots" {
-		var sj SnapshotsJSON
-		custJSONs = sj.getJson()
-	}
+	var custJSONs []byte
+	obj := r.URL.Query().Get("object")
+	custJSONs = readJson(Config[obj])
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Server", Config["version"])
 	log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
-	fmt.Fprint(w, fmt.Sprintf("%s", custJSONs))
+	fmt.Fprint(w, fmt.Sprintf("%s", string(custJSONs)))
 }
 
-func Info(w http.ResponseWriter, r *http.Request)   {}
-func Update(w http.ResponseWriter, r *http.Request) {}
-func Delete(w http.ResponseWriter, r *http.Request) {}
-
-/*
-
 func Info(w http.ResponseWriter, r *http.Request) {
-	_, cj := getJson()
-	queryValues := r.URL.Query()
-	id := queryValues.Get("id")
-	j, err := json.Marshal(cj[id])
+	var sj map[string]interface{}
+	var custJSONs []byte
+	obj := r.URL.Query().Get("object")
+	id := r.URL.Query().Get("id")
+
+	custJSONs = readJson(Config[obj])
+	err = json.Unmarshal(custJSONs, &sj)
 	if err != nil {
 		log.Println(err)
 	}
+	j, err := json.Marshal(sj[id])
+	if err != nil {
+		log.Println(err)
+	}
+
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.Header().Set("Server", Config["version"])
@@ -150,27 +144,52 @@ func Info(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
-	var new_cj ScheduleJSON
-	var err error
-
-	_, cj := getJson()
-
+	var (
+		sj        map[string]interface{}
+		new_cj    interface{}
+		err       error
+		custJSONs []byte
+	)
 	r.ParseForm()
 	queryValues := r.PostFormValue
 	id := queryValues("id")
-	new_cj.Id = queryValues("id")
-	new_cj.Name = queryValues("name")
-	new_cj.Starttime = queryValues("starttime")
-	new_cj.Stoptime = queryValues("stoptime")
-	new_cj.Exclude = queryValues("exclude")
-	if new_cj.Exclude == "" {
-		new_cj.Exclude = "no"
+	obj := queryValues("object")
+	custJSONs = readJson(Config[obj])
+	err = json.Unmarshal(custJSONs, &sj)
+	if err != nil {
+		log.Println(err)
 	}
-	new_cj.Workday = r.Form["wd"]
 
-	if new_cj.Id != "" && new_cj.Name != "" && new_cj.Starttime != "" && new_cj.Stoptime != "" {
-		cj[id] = new_cj
-		err = updateJSON(cj)
+	if obj == "scheduler" {
+		ex := ""
+		/*
+			new_cj = ScheduleJSON{Id: "", Name: "", Workday: nil, Stoptime: "", Starttime: "", Exclude: ""}
+
+			new_cj.Id = queryValues("id")
+			new_cj.Name = queryValues("name")
+			new_cj.Starttime = queryValues("starttime")
+			new_cj.Stoptime = queryValues("stoptime")
+			new_cj.Exclude = queryValues("exclude")
+			if queryValues("exclude") == "" {
+				ex = "no"
+			}
+			new_cj.Workday = r.Form["wd"]
+		*/
+		new_cj = ScheduleJSON{
+			Id:        queryValues("id"),
+			Name:      queryValues("name"),
+			Workday:   r.Form["wd"],
+			Stoptime:  queryValues("stoptime"),
+			Starttime: queryValues("starttime"),
+			Exclude:   ex}
+
+	} else if obj == "snapshots" {
+		a := 1
+	}
+
+	if new_cj.Id != "" && new_cj.Name != "" {
+		sj[id] = new_cj
+		//err = updateJSON(sj)
 	} else {
 		err = fmt.Errorf("Required parameters empty\nData dump:\n%v\n", new_cj)
 	}
@@ -184,10 +203,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "<h1>Error while file saving</h1><p>Data dump:</p><pre>%v</pre><a href='/admin'>back</a>", new_cj)
 	} else {
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
-		http.Redirect(w, r, "/admin", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/"+obj, http.StatusMovedPermanently)
 	}
 }
 
+func Delete(w http.ResponseWriter, r *http.Request) {}
+
+/*
 func Delete(w http.ResponseWriter, r *http.Request) {
 	_, cj := getJson()
 	queryValues := r.PostFormValue

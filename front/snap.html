@@ -101,52 +101,11 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="u_ex" class="col-sm-3 control-label">Exclude from processing</label>
+                    <label for="u_keep" class="col-sm-3 control-label">How long days keeps snapshot?</label>
                     <div class="col-sm-9">
-                        <input type="checkbox" id="u_ex" name="exclude" value='yes'>
+                        <input type="text" id="u_keep" name="keepdays" required="true">
                     </div>
                 </div>
-            
-                <div class="form-group">
-                    <label for="u_name" class="col-sm-3 control-label">Working Days</label>
-                    <div class="col-sm-9">
-                        <div class="checkbox">
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" id="u_Sunday" value="Sunday"> Sunday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" id="u_Monday" value="Monday"> Monday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" id="u_Tuesday" value="Tuesday"> Tuesday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" id="u_Wednesday" value="Wednesday"> Wednesday
-                            </label><br>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" id="u_Thursday" value="Thursday"> Thursday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" id="u_Friday" value="Friday"> Friday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" id="u_Saturday" value="Saturday"> Saturday
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="u_name" class="col-sm-3 control-label">Start time</label>
-                    <div class="col-sm-9">
-                        <input type="text" id="u_starttime" name="starttime" required="true">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="u_name" class="col-sm-3 control-label">Stop time</label>
-                    <div class="col-sm-9">
-                        <input type="text" id="u_stoptime" name="stoptime" required="true">
-                    </div>
-                </div>                
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary">Update</button>
@@ -179,51 +138,11 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="c_ex" class="col-sm-3 control-label">Exclude from processing</label>
+                    <label for="c_keep" class="col-sm-3 control-label">How long days keeps snapshot?</label>
                     <div class="col-sm-9">
-                        <input type="checkbox" id="c_ex" name="exclude" value='yes'>
+                        <input type="text" id="c_keep" name="keepdays" required="true">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Working Days</label>
-                    <div class="col-sm-9">
-                        <div class="checkbox">
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" value="Sunday"> Sunday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" value="Monday"> Monday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" value="Tuesday"> Tuesday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" value="Wednesday"> Wednesday
-                            </label><br>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" value="Thursday"> Thursday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" value="Friday"> Friday
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="wd" value="Saturday"> Saturday
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="c_starttime" class="col-sm-3 control-label">Start time</label>
-                    <div class="col-sm-9">
-                        <input type="text" id="c_starttime" name="starttime" value="07:59" required="true">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="c_stoptime" class="col-sm-3 control-label">Stop time</label>
-                    <div class="col-sm-9">
-                        <input type="text" id="c_stoptime" name="stoptime" value="21:59" required="true">
-                    </div>
-                </div>                
             </div>
 			<div class="modal-footer">
                 <button type="submit" class="btn btn-primary">Create</button>
@@ -260,20 +179,7 @@ $('#update_instance').on('shown.bs.modal',function(e){
         $('#u_idh').val(id);
         $('#u_idv').html(id);
         $('#u_name').val(block_arr.name);
-        $('#u_starttime').val(block_arr.starttime);
-        $('#u_stoptime').val(block_arr.stoptime);
-			if (typeof block_arr.exclude==="undefined" || block_arr.exclude=='no') {
-				$('#u_ex').prop({checked:false});
-			} else {
-				$('#u_ex').val(block_arr.exclude);
-				$('#u_ex').prop({checked:true});
-			}
-		
-		
-        for(var j in block_arr.workday) {
-            if (block_arr.workday[j])
-				$('#u_'+block_arr.workday[j]).prop({checked:true});
-        }
+        $('#u_keep').val(block_arr.keepdays);
     });
 });
 
