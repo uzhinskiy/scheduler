@@ -149,6 +149,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		new_cj    interface{}
 		err       error
 		custJSONs []byte
+		o_name    string
+		o_id      string
 	)
 	r.ParseForm()
 	queryValues := r.PostFormValue
@@ -162,6 +164,10 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	if obj == "scheduler" {
 		ex := ""
+		if queryValues("exclude") == "" {
+			ex = "no"
+		}
+
 		/*
 			new_cj = ScheduleJSON{Id: "", Name: "", Workday: nil, Stoptime: "", Starttime: "", Exclude: ""}
 
@@ -170,9 +176,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 			new_cj.Starttime = queryValues("starttime")
 			new_cj.Stoptime = queryValues("stoptime")
 			new_cj.Exclude = queryValues("exclude")
-			if queryValues("exclude") == "" {
-				ex = "no"
-			}
 			new_cj.Workday = r.Form["wd"]
 		*/
 		new_cj = ScheduleJSON{
@@ -182,12 +185,15 @@ func Update(w http.ResponseWriter, r *http.Request) {
 			Stoptime:  queryValues("stoptime"),
 			Starttime: queryValues("starttime"),
 			Exclude:   ex}
+		o_id = queryValues("id")
+		o_name = queryValues("name")
 
 	} else if obj == "snapshots" {
 		a := 1
+		a++
 	}
 
-	if new_cj.Id != "" && new_cj.Name != "" {
+	if o_id != "" && o_name != "" {
 		sj[id] = new_cj
 		//err = updateJSON(sj)
 	} else {
