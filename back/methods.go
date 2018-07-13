@@ -177,7 +177,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 			Exclude:   ex}
 		o_id = queryValues("id")
 		o_name = queryValues("name")
-
 	} else if obj == "snapshots" {
 		new_cj = SnapshotJSON{
 			Id:       queryValues("id"),
@@ -208,20 +207,31 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Delete(w http.ResponseWriter, r *http.Request) {}
-
-/*
 func Delete(w http.ResponseWriter, r *http.Request) {
-	_, cj := getJson()
+	var (
+		sj  map[string]interface{}
+		err error
+		//custJSONs []byte
+	)
+	r.ParseForm()
 	queryValues := r.PostFormValue
 	id := queryValues("id")
-	_, err := json.Marshal(cj[id])
+	obj := queryValues("object")
+	//custJSONs = readJson(Config[obj])
+	err = json.Unmarshal(readJson(Config[obj]), &sj)
 	if err != nil {
 		log.Println(err)
 	}
 
-	delete(cj, id)
-	err = updateJSON(cj)
+	/*_, err := json.Marshal(cj[id])
+	if err != nil {
+		log.Println(err)
+	}
+	*/
+
+	delete(sj, id)
+	jbytes, _ := json.Marshal(sj)
+	err = writeJSON(Config[obj], jbytes)
 	if err != nil {
 		log.Println(err)
 	}
@@ -235,10 +245,9 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "<h1>Error while file saving</h1><a href='/admin'>back</a>")
 	} else {
 		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
-		http.Redirect(w, r, "/admin", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/"+obj, http.StatusMovedPermanently)
 	}
 }
-*/
 
 func Auth(w http.ResponseWriter, r *http.Request) {
 	htp := make(htpass.HTPassFile)

@@ -23,8 +23,6 @@ type SnapshotJSON struct {
 type SchedulesJSON map[string]ScheduleJSON
 type SnapshotsJSON map[string]SnapshotJSON
 
-/* Реализация для Scheduler */
-
 func readJson(fname string) []byte {
 	json_f, err := os.OpenFile(fname, os.O_RDONLY, 0)
 	if err != nil {
@@ -34,13 +32,6 @@ func readJson(fname string) []byte {
 	fi, err := json_f.Stat()
 	var bytes = make([]byte, fi.Size())
 	json_f.Read(bytes)
-
-	/*
-		err = json.Unmarshal(bytes, &sj)
-			if err != nil {
-				log.Println(err)
-			}
-	*/
 	return bytes
 }
 
@@ -62,10 +53,3 @@ func writeJSON(fname string, jb []byte) error {
 
 	return nil
 }
-
-/*
-https://stackoverflow.com/questions/33928175/how-to-pass-different-types-to-a-function
-https://stackoverflow.com/questions/40720039/how-to-make-possible-to-return-structs-of-different-types-from-one-function-with
-https://stackoverflow.com/questions/35657362/how-to-return-dynamic-type-struct-in-golang
-https://stackoverflow.com/questions/24911993/golang-use-one-value-in-conditional-from-function-returning-multiple-arguments
-*/
