@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -258,7 +257,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	authttl, _ = strconv.Atoi(Config["authttl"])
+	authttl = helpers.Atoi(Config["authttl"])
 	if res {
 		expiration := time.Now().Add(time.Duration(authttl) * time.Minute)
 		cookie := http.Cookie{Name: "isauth", Value: "yes", Expires: expiration}
