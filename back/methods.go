@@ -210,23 +210,15 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	var (
 		sj  map[string]interface{}
 		err error
-		//custJSONs []byte
 	)
 	r.ParseForm()
 	queryValues := r.PostFormValue
 	id := queryValues("id")
 	obj := queryValues("object")
-	//custJSONs = readJson(Config[obj])
 	err = json.Unmarshal(readJson(Config[obj]), &sj)
 	if err != nil {
 		log.Println(err)
 	}
-
-	/*_, err := json.Marshal(cj[id])
-	if err != nil {
-		log.Println(err)
-	}
-	*/
 
 	delete(sj, id)
 	jbytes, _ := json.Marshal(sj)
