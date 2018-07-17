@@ -162,7 +162,7 @@
 
 <div class="modal fade" tabindex="-1" id="create_instance" role="dialog">
   <div class="modal-dialog" role="document">
-    <form action="/create" role="form" class="form-horizontal" method="POST">
+    <form action="/create" role="form" class="form-horizontal" method="POST" id="create_form">
         <input type="hidden" name="m" value="create">
         <input type="hidden" name="object" value="scheduler">
         <div class="modal-content">
@@ -174,7 +174,7 @@
                 <div class="form-group">
                     <label for="c_idv" class="col-sm-3 control-label">ID</label>
                     <div class="col-sm-9">
-                        <input type="text" id="c_idv" name="id" required="true">
+                        <select id="c_idv" name="id"  required="true"><option value="-1">----</option></select>
                     </div>
                 </div>
                 <div class="form-group">
@@ -291,6 +291,24 @@ $('#update_instance').on('shown.bs.modal',function(e){
 
 $('#update_instance').on('hidden.bs.modal',function(){
 	$('form#update_form').trigger( 'reset' );
+});
+
+$('#create_instance').on('shown.bs.modal',function(e){
+    var $select = $('#c_idv');
+    $.getJSON("/aws/list", function(data){
+        $.each(data, function(i, val){
+            $select.append($('<option />', { value: val.id, text: val.name }));
+        });
+    });
+    
+    $('#c_idv').change(function(){
+        $('#c_name').val( $('#c_idv option:selected').html() )
+    });
+    
+});
+
+$('#create_instance').on('hidden.bs.modal',function(){
+	$('form#create_form').trigger( 'reset' );
 });
 
 

@@ -131,7 +131,7 @@
                 <div class="form-group">
                     <label for="c_idv" class="col-sm-3 control-label">ID</label>
                     <div class="col-sm-9">
-                        <select id="c_idv" name="id"  required="true"></select>
+                        <select id="c_idv" name="id"  required="true"><option value="-1">----</option></select>
                     </div>
                 </div>
                 <div class="form-group">
@@ -143,7 +143,7 @@
                 <div class="form-group">
                     <label for="c_keep" class="col-sm-3 control-label">How long days keeps snapshot?</label>
                     <div class="col-sm-9">
-                        <input type="text" id="c_keep" name="keepdays" required="true">
+                        <input type="text" id="c_keep" name="keepdays" value="14" required="true">
                     </div>
                 </div>
             </div>
@@ -198,6 +198,11 @@ $('#create_instance').on('shown.bs.modal',function(e){
             $select.append($('<option />', { value: val.id, text: val.name }));
         });
     });
+    
+    $('#c_idv').change(function(){
+        $('#c_name').val( $('#c_idv option:selected').html() )
+    });
+    
 });
 
 $('#create_instance').on('hidden.bs.modal',function(){
