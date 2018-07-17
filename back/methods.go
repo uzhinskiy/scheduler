@@ -335,8 +335,9 @@ func AwsList(w http.ResponseWriter, r *http.Request) {
 		}
 		for _, reservation := range result.Reservations {
 			for _, instance := range reservation.Instances {
+				fmt.Printf("%v\n", *instance.Tags[0].Value)
 				iid = *instance.InstanceId
-				resp_json = append(resp_json, InstanceJSON{Id: iid})
+				resp_json = append(resp_json, InstanceJSON{Id: iid, Name: *instance.Tags[0].Value})
 			}
 		}
 
