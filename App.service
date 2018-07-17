@@ -3,6 +3,7 @@ Description=
 After=network.target
 
 [Service]
+Environment="HOME=/root" 'USER=root'
 Type=simple
 TimeoutStartSec=60
 ExecStart=/usr/local/sbin/App -config /usr/local/etc/App.cfg
