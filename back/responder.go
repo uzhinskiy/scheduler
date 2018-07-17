@@ -20,6 +20,11 @@ type SnapshotJSON struct {
 	Keepdays int    `json:"keepdays,omitempty"`
 }
 
+type InstanceJSON struct {
+	Id string `json:"id,omitempty"`
+}
+
+type InstancesJSON []InstanceJSON
 type SchedulesJSON map[string]ScheduleJSON
 type SnapshotsJSON map[string]SnapshotJSON
 

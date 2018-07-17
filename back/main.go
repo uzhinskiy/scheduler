@@ -62,6 +62,7 @@ func main() {
 	http.HandleFunc("/create", Update)
 	http.HandleFunc("/delete", Delete)
 	http.HandleFunc("/dump/", Dump)
+	http.HandleFunc("/aws/list", AwsList)
 	log.Println("HTTP server listening on", HTTPAddr)
 
 	err := http.ListenAndServe(HTTPAddr, nil)

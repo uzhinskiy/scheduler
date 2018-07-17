@@ -11,6 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/uzhinskiy/lib.go/helpers"
 	"github.com/uzhinskiy/lib.go/htpass"
 )
@@ -295,6 +298,58 @@ func Dump(w http.ResponseWriter, r *http.Request) {
 
 			fmt.Fprintf(w, "<pre>%s</pre>", bytes)
 		}
+	}
+}
+
+func AwsList(w http.ResponseWriter, r *http.Request) {
+
+	var resp_json InstancesJSON
+	var iid string
+
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(Config["aws_region"]),
+	}))
+
+	ec2Svc := ec2.New(sess)
+	params := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			&ec2.Filter{
+				Name:   aws.String("instance-state-name"),
+				Values: aws.StringSlice([]string{"running"}),
+			},
+		},
+	}
+
+	result, err := ec2Svc.DescribeInstances(params)
+	if err != nil {
+		log.Println(err)
+	} else {
+		if len(result.Reservations) == 0 {
+			w.Header().Add("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Header().Set("Server", Config["version"])
+			log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusServiceUnavailable, "\t", r.UserAgent())
+			fmt.Fprint(w, "<h3>There is no instance for the region: %s </h3>", Config["aws_region"])
+
+			log.Printf("There is no instance for the region: %s \n", Config["aws_region"])
+		}
+		for _, reservation := range result.Reservations {
+			for _, instance := range reservation.Instances {
+				iid = *instance.InstanceId
+				resp_json = append(resp_json, InstanceJSON{Id: iid})
+			}
+		}
+
+		j, err := json.Marshal(resp_json)
+		if err != nil {
+			log.Println(err)
+		}
+
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Server", Config["version"])
+		log.Println(r.RemoteAddr, "\t", r.Method, "\t", r.URL.Path, "\t", http.StatusOK, "\t", r.UserAgent())
+		fmt.Fprint(w, fmt.Sprintf("%s", j))
 	}
 }
 
