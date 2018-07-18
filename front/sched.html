@@ -307,10 +307,13 @@ $('#create_instance').on('shown.bs.modal',function(e){
     
 });
 
-$('#create_instance').on('hidden.bs.modal',function(){
-	$('form#create_form').trigger( 'reset' );
-});
 
+$('#create_instance').on('hidden.bs.modal',function(){
+        var select = document.getElementById("c_idv");
+        select.options.length = 0;
+        $('#c_idv').append($('<option />', { value: "-1", text: "------" }));
+        $('form#create_form').trigger( 'reset' );
+});
 
 $('#delete_instance').on('shown.bs.modal',function(e){
     var id = $(e.relatedTarget).data('id');
