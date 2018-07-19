@@ -166,7 +166,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if obj == "scheduler" {
-		ex := ""
+		ex := "yes"
 		if queryValues("exclude") == "" {
 			ex = "no"
 		}
